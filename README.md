@@ -1,2 +1,2 @@
 # Bell_HW1_CS6350
-Repo for D3 Practice 
+This is a machine learning library developed by \textbf{Anna Bell} for CS5350/6350 in University of Utah". 
