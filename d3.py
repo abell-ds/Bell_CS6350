@@ -30,6 +30,6 @@ def run(data_url: str, data_has_header: bool, max_depth: int = 6, IG_method: str
         data = np.genfromtxt(filename, delimiter=',')
         return D3.ID3(data, max_depth, IG_method)
     
-def __main__(url):
-    tree = d3(url, True)
+def __main__(data_url: str, data_has_header: bool, max_depth: int = 6, IG_method: str = ""):
+    tree = d3(url, data_has_header, max_depth, IG_method)
 
