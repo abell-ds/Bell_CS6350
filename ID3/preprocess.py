@@ -49,4 +49,4 @@ def clean(data=np.ndarray):
         # otherwise, the data is binary; we don't changee it
         else:
             new_data.append(column_vals.reshape(-1, 1))
-
+    return new_data

@@ -1,6 +1,7 @@
 """
 This file calls my ID3 python implemenation in the ID3 directory.
 """
+import ID3
 from ID3 import *
 import subprocess
 

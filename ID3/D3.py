@@ -15,7 +15,7 @@ class Node:
 
 
 class ID3:
-    def __init__(self, data: np.ndarray(), max_depth: int = 6, IG_method: str = ""):
+    def __init__(self, data: np.ndarray, max_depth: int = 6, IG_method: str = ""):
         """
         This constructor initializes an ID3 Tree with optional max_depth an impurity method functions.
         :param data: the entire dataset; a np.ndarray in the format (X,y) where y is the last column of the data containing the instance outcomes/target class.
@@ -23,16 +23,10 @@ class ID3:
         :param IG_method: an optional parameter for the method used to calculate uncertainty/impurity. the default is entropy.
         """
         print("Cleaning the data...")
-        self.S = self.clean(data)
+        self.S = preprocess.clean(self.S)
         print("Initializing root and setting information gain calculator")
         self.root = None
         self.IG = ig.InformationGain(method=IG_method)
-
-    def clean(self):
-        """
-        This pre-processing method checks the dtypes, converting any categorical/numeric variables to binary variables.
-        """
-        return preprocess.clean(self.S)
 
     def build_tree(self, data, attributes):
         """
