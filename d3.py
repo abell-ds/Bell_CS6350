@@ -8,7 +8,7 @@ import numpy as np
 from ID3 import D3 
 
 
-def main(data_url: str, data_has_header: bool, max_depth: int = 6, IG_method: str = ""):
+def run(data_url: str, data_has_header: bool, max_depth: int = 6, IG_method: str = ""):
     """
     This is the main method for a user to provide a data url and any specific preferences for running ID3.
     :param data_url: the url to fetch the data
