@@ -32,7 +32,6 @@ def split_data(X, y, best_split_inx, split_val):
     subset_mask = X[:, best_split_inx] == split_val
     return X[subset_mask], y[subset_mask]
 
-
 def calc_prediction_error(y_true, y_pred):
     """
     This method calculates the average prediction error given the true labels (y_true) and the predicted labels (y_pred).
@@ -41,8 +40,7 @@ def calc_prediction_error(y_true, y_pred):
     y_true: True labels (np.array)
     y_pred: Predicted labels (np.array)
     """
-    error_count = np.sum(y_true != y_pred)
-    return error_count / len(y_true)
+    return np.mean(y_true != y_pred)
 
 
 def preprocess_numerical(X):
@@ -274,12 +272,39 @@ def sep_X_y(data):
 def main(train_path, test_path):
     # Separate features and labels
     X_train, y_train, X_test, y_test = load_and_seperate_data(train_path, test_path)
-    # init and train ID3 model
-    tree = ID3(max_depth=6, impurity_measure="entropy")
-    tree.fit(X_train, y_train, print_steps=False)
 
-    # test ID3 model
-    y_pred = tree.predict(X_test)
-    error = calc_prediction_error(y_test, y_pred)
+    # Initialize a dictionary to keep track of average errors for each impurity measure
+    average_errors = {
+        "entropy": [],
+        "majority_error": [],
+        "gini": []
+    }
 
-    print(f"Prediction Error: {error}")
+    # List of impurity measures you'll use
+    impurity_measures = ["entropy", "majority_error", "gini"]
+
+    # Loop over different impurity measures
+    for measure in impurity_measures:
+        # Loop over different depths
+        for depth in range(1, 7):  # Depth varies from 1 to 6
+            tree = ID3(max_depth=depth, impurity_measure=measure)
+            tree.fit(X_train, y_train, print_steps=False)
+
+            y_pred_train = tree.predict(X_train)
+            avg_error_train = calc_prediction_error(y_train, y_pred_train)
+
+            y_pred_test = tree.predict(X_test)
+            avg_error_test = calc_prediction_error(y_test, y_pred_test)
+
+            # Append the average errors for this depth and impurity measure to the list
+            average_errors[measure].append((depth, avg_error_train, avg_error_test))
+
+    # Displaying average_errors; you can also print this to a file or plot it
+    for measure, errors in average_errors.items():
+        print(f"For {measure}:")
+        for depth, err_train, err_test in errors:
+            print(f"Depth: {depth}, Training Error: {err_train}, Test Error: {err_test}")
+
+
+if __name__ == "__main__":
+    main("/Users/annabell/Desktop/Homework This Week/ML_HW1_D3/ML1/bank-4/train.csv", "/Users/annabell/Desktop/Homework This Week/ML_HW1_D3/ML1/bank-4/test.csv")
