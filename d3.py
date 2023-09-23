@@ -76,20 +76,18 @@ class Node:
 class ID3:
     def __init__(self, max_depth: int = 6, impurity_measure: str = "entropy"):
         self.max_depth = max_depth
-        self.impurity_measure = {"entropy": entropy, "gini": gini, "me": max_error}.get(impurity_measure, entropy)
+        self.impurity_measure = impurity_measure
         self.root = None
         self.most_common_label = None
 
-    def fit(self, X, y, print_steps=False):
+    def fit(self, X, y):
         """
         Train the model given X, y.
         Then it will then initialize the root node and call the recursive function (build_tree) to build the tree.
-        The "print_steps" flag, if true, will print out the Information Gain calculations (for debugging).
 
         Parameters:
         :param X: attributes (np.array)
         :param y: labels (np array)
-        :param print_steps:  a flag for printing calculations at each step, for debugging. (bool)
         :return:
         """
         # preprocess numerical attributes, if any
@@ -97,7 +95,7 @@ class ID3:
         # for prediction if a value is not found
         self.most_common_label = np.unique(y)[0]
         # create the root node and start recursive process
-        self.root = self.build_tree(X, y, depth=0, print_steps=print_steps)
+        self.root = self.build_tree(X, y, depth=0)
 
     def calc_impurity(self, y):
         """
@@ -108,7 +106,14 @@ class ID3:
         :param y: labels (np array)
         :return: calculated impurity (float)
         """
-        return self.impurity_measure(y)
+        if self.impurity_measure == "entropy":
+            return entropy(y)
+        elif self.impurity_measure == "me":
+            return max_error(y)
+        elif self.impurity_measure == "gini":
+            return gini(y)
+        else:
+            return gini(y) #had to hardcode this for all 3, something wasn't going right
 
     def information_gain(self, X, y, attribute_index):
         """
@@ -160,7 +165,7 @@ class ID3:
             IGs.append(self.information_gain(X, y, i))
         return np.argmax(IGs)
 
-    def build_tree(self, X, y, depth, print_steps=False):
+    def build_tree(self, X, y, depth):
         """
         To recursively build the decision tree, for each feature in X call information_gain to find the best feature to split.
 
@@ -168,7 +173,6 @@ class ID3:
         :param X: attributes (np.array)
         :param y: labels (np array)
         :param depth: the current depth of the tree (int)
-        :param print_steps: bool - a flag for printing calculations at each step, for debugging. (bool)
         """
         # base cases: all elements have same class OR no attributes remaining OR max depth reached
         unique_targets = np.unique(y)
@@ -188,7 +192,6 @@ class ID3:
 
         # return the new node
         return new_node
-        
 
     def predict(self, X):
         """
@@ -255,34 +258,77 @@ def main(train_path, test_path):
     # Initialize a dictionary to keep track of average errors for each impurity measure
     average_errors = {
         "entropy": [],
-        "majority_error": [],
+        "me": [],
         "gini": []
     }
 
     # List of impurity measures you'll use
-    impurity_measures = ["entropy", "majority_error", "gini"]
+    impurity_measures = ["entropy", "me", "gini"]
 
-    # Loop over different impurity measures
-    for measure in impurity_measures:
-        # Loop over different depths
-        for depth in range(1, 7):  # Depth varies from 1 to 6
-            tree = ID3(max_depth=depth, impurity_measure=measure)
-            tree.fit(X_train, y_train, print_steps=False)
 
-            y_pred_train = tree.predict(X_train)
-            avg_error_train = calc_prediction_error(y_train, y_pred_train)
+    #entropy
+    print("\n ENTROPY \n")
+    for depth in range(1, 7):  # Depth varies from 1 to 6
+        tree = ID3(max_depth=depth, impurity_measure="entropy")
+        tree.fit(X_train, y_train)
 
-            y_pred_test = tree.predict(X_test)
-            avg_error_test = calc_prediction_error(y_test, y_pred_test)
+        y_pred_train = tree.predict(X_train)
+        avg_error_train = calc_prediction_error(y_train, y_pred_train)
 
-            # Append the average errors for this depth and impurity measure to the list
-            average_errors[measure].append((depth, avg_error_train, avg_error_test))
+        y_pred_test = tree.predict(X_test)
+        avg_error_test = calc_prediction_error(y_test, y_pred_test)
 
-    # Displaying average_errors; you can also print this to a file or plot it
-    for measure, errors in average_errors.items():
-        print(f"For {measure}:")
-        for depth, err_train, err_test in errors:
-            print(f"Depth: {depth}, Training Error: {err_train}, Test Error: {err_test}")
+        # Append the average errors for this depth and impurity measure to the list
+        average_errors["entropy"].append((depth, avg_error_train, avg_error_test))
+
+        # Displaying average_errors; you can also print this to a file or plot it
+        for measure, errors in average_errors.items():
+            print(f"For {entropy}:")
+            for depth, err_train, err_test in errors:
+                print(f"Depth: {depth}, Training Error: {err_train}, Test Error: {err_test}")
+    #me
+    print("\n ME \n")
+
+    for depth in range(1, 7):  # Depth varies from 1 to 6
+        tree = ID3(max_depth=depth, impurity_measure="me")
+        tree.fit(X_train, y_train)
+
+        y_pred_train = tree.predict(X_train)
+        avg_error_train = calc_prediction_error(y_train, y_pred_train)
+
+        y_pred_test = tree.predict(X_test)
+        avg_error_test = calc_prediction_error(y_test, y_pred_test)
+
+        # Append the average errors for this depth and impurity measure to the list
+        average_errors["me"].append((depth, avg_error_train, avg_error_test))
+
+        # Displaying average_errors; you can also print this to a file or plot it
+        for measure, errors in average_errors.items():
+            print(f"For {max_error}:")
+            for depth, err_train, err_test in errors:
+                print(f"Depth: {depth}, Training Error: {err_train}, Test Error: {err_test}")
+
+    #gini
+    print("\n GINI \n")
+
+    for depth in range(1, 17):  # Depth varies from 1 to 6
+        tree = ID3(max_depth=depth, impurity_measure="gini")
+        tree.fit(X_train, y_train)
+
+        y_pred_train = tree.predict(X_train)
+        avg_error_train = calc_prediction_error(y_train, y_pred_train)
+
+        y_pred_test = tree.predict(X_test)
+        avg_error_test = calc_prediction_error(y_test, y_pred_test)
+
+        # Append the average errors for this depth and impurity measure to the list
+        average_errors["gini"].append((depth, avg_error_train, avg_error_test))
+
+        # Displaying average_errors; you can also print this to a file or plot it
+        for measure, errors in average_errors.items():
+            print(f"For {gini}:")
+            for depth, err_train, err_test in errors:
+                print(f"Depth: {depth}, Training Error: {err_train}, Test Error: {err_test}")
 
 
 if __name__ == "__main__":
