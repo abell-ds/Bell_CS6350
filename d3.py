@@ -191,28 +191,6 @@ class ID3:
         # return the new node
         return new_node
 
-    """
-    NON-RECURSIVE ALTERNATIVE
-    
-    def build_tree(self, X, y, depth, print_steps=False):
-    stack = [(X, y, depth, self.root)]
-    while stack:
-        X, y, depth, node = stack.pop()
-        unique_targets = np.unique(y)
-        if len(unique_targets) == 1 or len(X.shape[1]) == 0 or depth == self.max_depth:
-            node.value = y[0]
-        else:
-            best_split_inx = self.find_best_split(X, y)
-            node.attribute = best_split_inx
-            unique_values = np.unique(X[:, best_split_inx])
-            for value in unique_values:
-                X_subset, y_subset = split_data(X, y, best_split_inx, value)
-                child_node = Node()
-                node.children[value] = child_node
-                stack.append((X_subset, y_subset, depth + 1, child_node))
-    return self.root
-    """
-
     def predict(self, X):
         """
         This method traverses the constructed tree for each example in X and returns predicted labels for y.
